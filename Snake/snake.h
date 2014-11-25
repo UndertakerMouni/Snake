@@ -2,6 +2,7 @@
 #define SNAKE_H
 
 #include <QMainWindow>
+#include <QKeyEvent>
 
 namespace Ui {
 class Snake;
@@ -14,7 +15,14 @@ class Snake : public QMainWindow
 public:
     explicit Snake(QWidget *parent = 0);
     ~Snake();
-
+private slots:
+    void gameStart();
+    void onPause();
+    void superSpeed();
+    void fastSpeed();
+    void midSpeed();
+    void slowSpeed();
+    void verySlowSpeed();
 private:
     Ui::Snake *ui;
 
@@ -36,19 +44,25 @@ private:
     int GameOver;             //使游戏结束的变量
     int level;                //设置等级
     int length;               //为了设置等级而与node一样记录设的长度
+
+    int timerID;
     /////////////
 
-   // void    display(int image[20][20],CDC *pDC);
+
     void ReInit();
     int  DrawSnake();           //记录小蛇每次移动后头部及身体的下一坐标
     void Automove();            //使小蛇自动移动
     int  Gameover();            //判断游戏是否结束
     int  Generatefood();        //产生食物
-    //void display();             //显示游戏面板
     void shiftLeft();           //控制左移
     void shiftRight();          //控制右移
     void shiftDown();           //控制下移
     void shiftUp();	            //控制上移
+
+protected:
+    void keyPressEvent(QKeyEvent  *event);
+    void timerEvent(QTimerEvent *event);
+    void paintEvent(QPaintEvent *event);
 };
 
 #endif // SNAKE_H

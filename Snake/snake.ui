@@ -1,24 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>Snake</class>
- <widget class="QMainWindow" name="Snake" >
-  <property name="geometry" >
+ <widget class="QMainWindow" name="Snake">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>466</width>
+    <height>473</height>
    </rect>
   </property>
-  <property name="windowTitle" >
+  <property name="windowTitle">
    <string>Snake</string>
   </property>
-  <widget class="QMenuBar" name="menuBar" />
-  <widget class="QToolBar" name="mainToolBar" />
-  <widget class="QWidget" name="centralWidget" />
-  <widget class="QStatusBar" name="statusBar" />
+  <widget class="QWidget" name="centralWidget">
+   <widget class="QLabel" name="label_Score">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>0</y>
+      <width>81</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 75 14pt &quot;楷体&quot;;
+color rgb(0, 255, 0)</string>
+    </property>
+    <property name="text">
+     <string>Score:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_Level">
+    <property name="geometry">
+     <rect>
+      <x>270</x>
+      <y>0</y>
+      <width>81</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">font: 75 14pt &quot;楷体&quot;;
+color rgb(0 255,0);</string>
+    </property>
+    <property name="text">
+     <string>Level:</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>466</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu_P">
+    <property name="title">
+     <string>速度设定(&amp;P)</string>
+    </property>
+    <addaction name="action_veryFast"/>
+    <addaction name="action_fast"/>
+    <addaction name="action_mid"/>
+    <addaction name="action_slow"/>
+    <addaction name="action_verySlow"/>
+   </widget>
+   <widget class="QMenu" name="menu_H">
+    <property name="title">
+     <string>帮助(&amp;H)</string>
+    </property>
+    <addaction name="action_help"/>
+    <addaction name="action_Snake"/>
+   </widget>
+   <widget class="QMenu" name="menu_G">
+    <property name="title">
+     <string>游戏(&amp;G)</string>
+    </property>
+    <addaction name="action_startGame"/>
+    <addaction name="action_pause"/>
+    <addaction name="action_quit"/>
+   </widget>
+   <addaction name="menu_G"/>
+   <addaction name="menu_P"/>
+   <addaction name="menu_H"/>
+  </widget>
+  <action name="action_veryFast">
+   <property name="text">
+    <string>飞快</string>
+   </property>
+  </action>
+  <action name="action_fast">
+   <property name="text">
+    <string>较快</string>
+   </property>
+  </action>
+  <action name="action_mid">
+   <property name="text">
+    <string>中速</string>
+   </property>
+  </action>
+  <action name="action_slow">
+   <property name="text">
+    <string>较慢</string>
+   </property>
+  </action>
+  <action name="action_verySlow">
+   <property name="text">
+    <string>很慢</string>
+   </property>
+  </action>
+  <action name="action_help">
+   <property name="text">
+    <string>游戏说明</string>
+   </property>
+  </action>
+  <action name="action_Snake">
+   <property name="text">
+    <string>关于Snake</string>
+   </property>
+  </action>
+  <action name="action_startGame">
+   <property name="text">
+    <string>开始(&amp;S)</string>
+   </property>
+  </action>
+  <action name="action_pause">
+   <property name="text">
+    <string>暂停(&amp;P)</string>
+   </property>
+  </action>
+  <action name="action_quit">
+   <property name="text">
+    <string>退出(&amp;Q)</string>
+   </property>
+  </action>
  </widget>
- <layoutDefault spacing="6" margin="11" />
- <pixmapfunction></pixmapfunction>
+ <layoutdefault spacing="6" margin="11"/>
  <resources/>
  <connections/>
 </ui>

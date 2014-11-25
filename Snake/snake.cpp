@@ -1,11 +1,18 @@
 #include "snake.h"
 #include "ui_snake.h"
 
+#include <QMessageBox>
+#include <QTimerEvent>
+#include <QPainter>
+#include <QTime>
+#include <QBrush>
+
 Snake::Snake(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::Snake)
 {
     ui->setupUi(this);
+    setFixedSize(441,462);
 
     head=3;                //初始化头部下标
     tail=0;                //初始化尾部下标
@@ -16,8 +23,8 @@ Snake::Snake(QWidget *parent) :
     GameOver=0;            //进入游戏初始化为0
     level=1;
     length=4;
-    IsPause=FALSE;
-    p=FALSE;
+    IsPause=false;
+    p=false;
     for(i=0;i<20;i++)                   //初始化游戏面板
         for(j=0;j<20;j++)
             image[i][j]=0;
@@ -30,10 +37,24 @@ Snake::Snake(QWidget *parent) :
     image[1][4]=1;
     Generatefood();                                            //产生食物
 
+    QString Level = "Level:";
+    Level += QString::number(level);
+    ui->label_Level->setText(Level);
+
+    QString Score = "Score:";
+    Score += QString::number(score);
+    ui->label_Score->setText(Score);
 
     /////////////////////////////////////////
+    connect(ui->action_startGame, SIGNAL(triggered()), this, SLOT(gameStart()));
+    connect(ui->action_pause, SIGNAL(triggered()) ,this,  SLOT(onPause()));
+    connect(ui->action_quit, SIGNAL(triggered()), this, SLOT(close()));
 
-
+    connect(ui->action_veryFast, SIGNAL(triggered()), this, SLOT(superSpeed()));
+    connect(ui->action_fast, SIGNAL(triggered()), this, SLOT(fastSpeed()));
+    connect(ui->action_mid, SIGNAL(triggered()), this, SLOT(midSpeed()));
+    connect(ui->action_slow, SIGNAL(triggered()), this, SLOT(slowSpeed()));
+    connect(ui->action_verySlow, SIGNAL(triggered()), this, SLOT(verySlowSpeed()));
 }
 
 Snake::~Snake()
@@ -146,10 +167,10 @@ int  Snake::Gameover()
 //产生食物
 int  Snake::Generatefood()
 {
-    qsrand(time(0));                                               //以时间为种子生成随机序列
+    qsrand(QTime::currentTime().msec());                          //以时间为种子生成随机序列
     do{
-        FoodX=rand()%20;                                             //食物输出的X坐标
-        FoodY=rand()%20;                                             //食物输出的Y坐标
+        FoodX=qrand()%20;                                         //食物输出的X坐标
+        FoodY=qrand()%20;                                         //食物输出的Y坐标
     }while(image[FoodX][FoodY]!=0);                               //产生的食物坐标限定在游戏面板内，且食物坐标不与小蛇身体坐标重合
     image[FoodX][FoodY]=2;
     return image[FoodX][FoodY];
@@ -172,11 +193,232 @@ void Snake::shiftRight()
 //控制下移
 void Snake::shiftDown()
 {
-    direction = 8;
+    direction = 2;
 }
 
 //控制上移
 void Snake::shiftUp()
 {
-    direction = 2;
+    direction = 8;
+}
+/////////////////////////////////////////////
+
+void Snake::keyPressEvent(QKeyEvent *event)
+{
+   if(direction == 2 || direction == 8)
+   {
+       if(event->key() == Qt::Key_Right)
+           shiftRight();
+       else if(event->key() == Qt::Key_Left)
+           shiftLeft();
+       else if(event->key() == Qt::Key_0)
+           onPause();
+
+   }
+   else if(direction == 4 || direction == 6)
+   {
+       if(event->key() == Qt::Key_Up)
+           shiftUp();
+       else if(event->key() == Qt::Key_Down)
+           shiftDown();
+       else if(event->key() == Qt::Key_0)
+           onPause();
+   }
+}
+
+void Snake::timerEvent(QTimerEvent *event)
+{
+    if(event->timerId() == timerID)
+    {
+        if(!GameOver)
+        {
+            if(!IsPause)
+                Automove();			                              // 校舍自动移动
+            Gameover();                                       //判断游戏是否结束
+            if(GameOver==1)
+            {
+                killTimer(timerID);
+
+                if(level>8)
+                    if(QMessageBox::question(this,tr("提示"),tr("你一定是骨灰级玩家！小弟佩服！还想挑战吗？"),QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes)
+                    {
+                        ReInit();
+                        gameStart();
+                    }
+                    else
+                        close();
+                else if(level>5)
+                    if(QMessageBox::question(this,tr("提示"),tr("你一定是高手！还想挑战吗？"),QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes)
+                    {
+                        ReInit();
+                        gameStart();
+                    }
+                    else
+                        close();
+                else if(QMessageBox::question(this,tr("提示"),tr("继续努力！还想挑战吗？"),QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes)
+                {
+                    ReInit();
+                    gameStart();
+                }
+                else
+                    close();
+            }
+            DrawSnake();      //判断是否吃食物
+        }
+        this->repaint();
+    }
+}
+
+void Snake::paintEvent(QPaintEvent *event)
+{
+    QPainter painter(this);
+
+    int nSize = 20;
+    int offset = 1;
+    QImage img;
+    img.load(":/images/border.png");
+    QBrush brushborder(img);
+    painter.setBrush(brushborder);
+
+    QRect bottomrec(0,nSize*22+offset,nSize*22,nSize);
+    painter.fillRect(bottomrec,brushborder);
+
+    QRect toprec(0,20+offset,nSize*22,nSize);
+    painter.fillRect(toprec,brushborder);
+
+    QRect leftrec(0,20+offset,nSize,nSize*21);
+    painter.fillRect(leftrec,brushborder);
+
+    QRect rightrec(nSize*21,20+offset,nSize,nSize*21);
+    painter.fillRect(rightrec,brushborder);
+
+
+    QRect rect(20,40+offset,nSize*20,nSize*20);
+    QImage imageBack;
+    imageBack.load(":/images/grass.png");
+    QBrush brushBack(imageBack);
+    painter.setBrush(brushBack);
+    painter.drawRect(rect);
+
+    QRect rc;
+    QBrush brush(QColor(255,0,0));
+    painter.setBrush(brush);
+
+    QString Level = "Level:";
+    Level += QString::number(level);
+    ui->label_Level->setText(Level);
+
+    QString Score = "Score:";
+    Score += QString::number(score);
+    ui->label_Score->setText(Score);
+
+    for(i=0;i<20;i++)
+    {
+        for(j=0;j<20;j++)
+        {
+            rc = QRect(j*nSize+20,i*nSize+40+offset,nSize,nSize);
+            if(image[i][j]!=0)
+            {
+                if(image[i][j]==3)
+                {
+                    QImage img;
+                    img.load(":/images/body.png");
+                    QBrush brush(img);
+                    painter.setBrush(brush);
+                    painter.fillRect(rc,brush);
+                }
+                else if(image[i][j] == 1)
+                {
+                    if(direction==2)
+                    {
+                        QImage img;
+                        img.load(":/images/headdown.png");
+                        QBrush brush(img);
+                        painter.setBrush(brush);
+                        painter.fillRect(rc,brush);
+                    }
+                    else if(direction == 4)
+                    {
+                        QImage img;
+                        img.load(":/images/headleft.png");
+                        QBrush brush(img);
+                        painter.setBrush(brush);
+                        painter.fillRect(rc,brush);
+                    }
+                    else if(direction == 6)
+                    {
+                        QImage img;
+                        img.load(":/images/headright.png");
+                        QBrush brush(img);
+                        painter.setBrush(brush);
+                        painter.fillRect(rc,brush);
+                    }
+                    else
+                    {
+                        QImage img;
+                        img.load(":/images/headup.png");
+                        QBrush brush(img);
+                        painter.setBrush(brush);
+                        painter.fillRect(rc,brush);
+                    }
+
+                }
+                else if(image[i][j] == 2)
+                {
+                    QImage img;
+                    img.load(":/images/apple.png");
+                    QBrush brush(img);
+                    painter.setBrush(brush);
+                    painter.fillRect(rc,brush);
+                }
+            }
+
+        }
+    }
+}
+
+//////////////////////////////////////////////////////////////////////
+
+void Snake::gameStart()
+{
+    timerID = startTimer(gamespeed);
+}
+
+void Snake::onPause()
+{
+    if(p)
+    {
+        IsPause = false;
+        p = false;
+    }
+    else
+    {
+        IsPause = true;
+        p = true;
+    }
+}
+
+void Snake::superSpeed()
+{
+    gamespeed = 75;
+}
+
+void Snake::fastSpeed()
+{
+    gamespeed = 130;
+}
+
+void Snake::midSpeed()
+{
+    gamespeed = 180;
+}
+
+void Snake::slowSpeed()
+{
+    gamespeed = 230;
+}
+
+void Snake::verySlowSpeed()
+{
+    gamespeed = 300;
 }
